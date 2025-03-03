@@ -1,4 +1,4 @@
-# Mock of AISOP Dashboard
+# Mock of AISOP Data copilot UI Dashboard
 
 ## **Note** 
 
