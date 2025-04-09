@@ -213,13 +213,12 @@ const DashboardLayout = () => {
               <div className="h-64 border border-gray-700 rounded-md p-2 mb-4 overflow-y-auto bg-black">
                 <div className="space-y-2">
                   <div className="bg-gray-800 p-2 rounded-lg max-w-xs">How can I help you today?</div>
-                  <div className="bg-blue-900 p-2 rounded-lg max-w-xs ml-auto">Show me the power flow forecast.</div>
                 </div>
               </div>
               <div className="flex gap-2">
                 <input 
                   type="text" 
-                  placeholder="How can I help to get an overview of your grid situation right now ...?" 
+                  placeholder="..." 
                   className="flex-1 rounded-md border-gray-700 bg-black focus:border-blue-500 focus:ring-blue-500" 
                 />
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Send</button>
