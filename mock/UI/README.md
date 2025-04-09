@@ -1,8 +1,8 @@
-# Mock of AISOP Dashboard
+# Mock of AISOP Data Co-Pilot UI Dashboard
 
-# **Note** 
+## **Note** 
 
-As this is simply a mock, it is created bootstraped with [Create React App]() with is [**deprecated**](https://react.dev/blog/2025/02/14/sunsetting-create-react-app). For current basic exploration of user experience concepts, it is still a good starting point. But, for production, it is recommended to use a more modern tool like [Vite](https://vitejs.dev/). 
+As this is simply a mock, it is created with [Create React App]() though it is [**deprecated**](https://react.dev/blog/2025/02/14/sunsetting-create-react-app). For current basic exploration of user experience concepts, it is still a good starting point. But, for production, it is recommended to use a more modern tool like [Vite](https://vitejs.dev/). 
 
 # Getting Started with Create React App
 
