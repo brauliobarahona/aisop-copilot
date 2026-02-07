@@ -43,6 +43,8 @@ const DashboardLayout = () => {
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [paramValues, setParamValues] = useState({});
+  const [isRunning, setIsRunning] = useState(false);
+  const [workflowResult, setWorkflowResult] = useState(null);
   
   const workflows = [
     'Anomaly Detection',
@@ -106,6 +108,250 @@ const DashboardLayout = () => {
     }
   ];
 
+  // Mock result generators per workflow
+  const generateMockResult = (workflow, params) => {
+    switch (workflow) {
+      case 'Anomaly Detection':
+        return {
+          type: 'anomaly',
+          summary: `DBSCAN clustering (eps=${params['eps'] || 0.5}, min_samples=${params['min_samples'] || 5}) on ${params['PCA Dimensions'] || 3} PCA dimensions`,
+          anomalies: [
+            { timestamp: '2022-11-15T06:33:20Z', score: 0.92, cluster: -1, description: 'Voltage deviation on L3 (+2.1σ)' },
+            { timestamp: '2022-11-15T07:15:00Z', score: 0.87, cluster: -1, description: 'Energy consumption spike L1-L3 correlated' },
+            { timestamp: '2022-11-15T09:42:00Z', score: 0.78, cluster: -1, description: 'Phase imbalance U_L1 vs U_L2 > threshold' },
+          ],
+          stats: { total_points: 288, anomalies_found: 3, clusters: 4 }
+        };
+      case 'Power Flow Forecast':
+        return {
+          type: 'forecast',
+          summary: `${params['Method'] || 'NN'} forecast, horizon=${params['Forecast Horizon (hours)'] || 24}h`,
+          forecast: [
+            { hour: '+1h', P_load: 12.4, P_gen: 3.1, net_flow: 9.3 },
+            { hour: '+3h', P_load: 14.8, P_gen: 5.7, net_flow: 9.1 },
+            { hour: '+6h', P_load: 18.2, P_gen: 8.9, net_flow: 9.3 },
+            { hour: '+12h', P_load: 22.1, P_gen: 11.2, net_flow: 10.9 },
+            { hour: '+24h', P_load: 13.6, P_gen: 2.8, net_flow: 10.8 },
+          ],
+          metrics: { mae: 1.23, rmse: 1.87, mape: '5.4%' }
+        };
+      case 'Risk Assessment':
+        return {
+          type: 'risk',
+          summary: 'Grid risk assessment based on current sensor readings',
+          risks: [
+            { component: 'Transformer T1', level: 'Low', probability: 0.12, impact: 'Moderate', detail: 'Thermal headroom adequate' },
+            { component: 'Feeder F3', level: 'Medium', probability: 0.38, impact: 'High', detail: 'Loading approaching 85% capacity' },
+            { component: 'Bus B2', level: 'High', probability: 0.71, impact: 'High', detail: 'Voltage stability margin < 5%' },
+            { component: 'Line L7', level: 'Low', probability: 0.08, impact: 'Low', detail: 'Within normal operating range' },
+          ],
+          overall: 'Medium'
+        };
+      case 'Dynamic Tariff Evaluation':
+        return {
+          type: 'tariff',
+          summary: 'Tariff optimization based on forecasted load and generation',
+          periods: [
+            { window: '00:00 - 06:00', tariff: 0.08, signal: 'Low', recommendation: 'Shift deferrable loads here' },
+            { window: '06:00 - 09:00', tariff: 0.15, signal: 'Medium', recommendation: 'Normal operation' },
+            { window: '09:00 - 17:00', tariff: 0.12, signal: 'Low-Med', recommendation: 'Solar generation offsets demand' },
+            { window: '17:00 - 21:00', tariff: 0.28, signal: 'High', recommendation: 'Curtail non-essential loads' },
+            { window: '21:00 - 00:00', tariff: 0.14, signal: 'Medium', recommendation: 'Battery discharge window' },
+          ],
+          savings_potential: '18.3%'
+        };
+      default:
+        return null;
+    }
+  };
+
+  const handleRunWorkflow = () => {
+    setIsRunning(true);
+    setWorkflowResult(null);
+    // Simulate async workflow execution
+    setTimeout(() => {
+      const result = generateMockResult(selectedWorkflow, paramValues);
+      setWorkflowResult(result);
+      setIsRunning(false);
+    }, 1500);
+  };
+
+  const riskColor = (level) => {
+    switch (level) {
+      case 'High': return 'bg-red-900 text-red-200';
+      case 'Medium': return 'bg-yellow-900 text-yellow-200';
+      case 'Low': return 'bg-green-900 text-green-200';
+      default: return 'bg-gray-800 text-gray-200';
+    }
+  };
+
+  const renderWorkflowOutput = () => {
+    if (isRunning) {
+      return (
+        <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-lg bg-black">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <p className="text-gray-400">Running {selectedWorkflow}...</p>
+        </div>
+      );
+    }
+
+    if (!workflowResult) {
+      return (
+        <div className="h-full flex items-center justify-center border-2 border-dashed border-gray-700 rounded-lg bg-black">
+          <p className="text-gray-400">Select a workflow and click "Run Workflow" to view output</p>
+        </div>
+      );
+    }
+
+    switch (workflowResult.type) {
+      case 'anomaly':
+        return (
+          <div className="space-y-3 overflow-y-auto max-h-80">
+            <p className="text-sm text-gray-400">{workflowResult.summary}</p>
+            <div className="flex gap-4 text-sm">
+              <span className="px-2 py-1 bg-gray-800 rounded">Points: {workflowResult.stats.total_points}</span>
+              <span className="px-2 py-1 bg-red-900 text-red-200 rounded">Anomalies: {workflowResult.stats.anomalies_found}</span>
+              <span className="px-2 py-1 bg-gray-800 rounded">Clusters: {workflowResult.stats.clusters}</span>
+            </div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left py-2 px-2 text-gray-400">Timestamp</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Score</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {workflowResult.anomalies.map((a, i) => (
+                  <tr key={i} className="border-b border-gray-800">
+                    <td className="py-2 px-2 font-mono text-xs">{a.timestamp}</td>
+                    <td className="py-2 px-2">
+                      <span className="px-2 py-0.5 bg-red-900 text-red-200 rounded text-xs">{a.score.toFixed(2)}</span>
+                    </td>
+                    <td className="py-2 px-2">{a.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case 'forecast':
+        return (
+          <div className="space-y-3 overflow-y-auto max-h-80">
+            <p className="text-sm text-gray-400">{workflowResult.summary}</p>
+            <div className="flex gap-4 text-sm">
+              <span className="px-2 py-1 bg-gray-800 rounded">MAE: {workflowResult.metrics.mae}</span>
+              <span className="px-2 py-1 bg-gray-800 rounded">RMSE: {workflowResult.metrics.rmse}</span>
+              <span className="px-2 py-1 bg-gray-800 rounded">MAPE: {workflowResult.metrics.mape}</span>
+            </div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left py-2 px-2 text-gray-400">Horizon</th>
+                  <th className="text-left py-2 px-2 text-gray-400">P_load [kW]</th>
+                  <th className="text-left py-2 px-2 text-gray-400">P_gen [kW]</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Net Flow [kW]</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {workflowResult.forecast.map((f, i) => (
+                  <tr key={i} className="border-b border-gray-800">
+                    <td className="py-2 px-2 font-mono">{f.hour}</td>
+                    <td className="py-2 px-2">{f.P_load}</td>
+                    <td className="py-2 px-2">{f.P_gen}</td>
+                    <td className="py-2 px-2">{f.net_flow}</td>
+                    <td className="py-2 px-2">
+                      <div className="w-full bg-gray-800 rounded-full h-2">
+                        <div
+                          className="bg-blue-500 h-2 rounded-full"
+                          style={{ width: `${Math.min((f.P_gen / f.P_load) * 100, 100)}%` }}
+                        ></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case 'risk':
+        return (
+          <div className="space-y-3 overflow-y-auto max-h-80">
+            <p className="text-sm text-gray-400">{workflowResult.summary}</p>
+            <div className="text-sm">
+              Overall Grid Risk: <span className={`px-2 py-1 rounded text-xs font-semibold ${riskColor(workflowResult.overall)}`}>{workflowResult.overall}</span>
+            </div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left py-2 px-2 text-gray-400">Component</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Risk</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Prob.</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Impact</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Detail</th>
+                </tr>
+              </thead>
+              <tbody>
+                {workflowResult.risks.map((r, i) => (
+                  <tr key={i} className="border-b border-gray-800">
+                    <td className="py-2 px-2 font-medium">{r.component}</td>
+                    <td className="py-2 px-2">
+                      <span className={`px-2 py-0.5 rounded text-xs ${riskColor(r.level)}`}>{r.level}</span>
+                    </td>
+                    <td className="py-2 px-2">{(r.probability * 100).toFixed(0)}%</td>
+                    <td className="py-2 px-2">{r.impact}</td>
+                    <td className="py-2 px-2 text-gray-400">{r.detail}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case 'tariff':
+        return (
+          <div className="space-y-3 overflow-y-auto max-h-80">
+            <p className="text-sm text-gray-400">{workflowResult.summary}</p>
+            <div className="text-sm">
+              Estimated Savings: <span className="px-2 py-1 bg-green-900 text-green-200 rounded text-xs font-semibold">{workflowResult.savings_potential}</span>
+            </div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left py-2 px-2 text-gray-400">Time Window</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Tariff [EUR/kWh]</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Signal</th>
+                  <th className="text-left py-2 px-2 text-gray-400">Recommendation</th>
+                </tr>
+              </thead>
+              <tbody>
+                {workflowResult.periods.map((p, i) => (
+                  <tr key={i} className="border-b border-gray-800">
+                    <td className="py-2 px-2 font-mono">{p.window}</td>
+                    <td className="py-2 px-2">{p.tariff.toFixed(2)}</td>
+                    <td className="py-2 px-2">
+                      <span className={`px-2 py-0.5 rounded text-xs ${
+                        p.signal === 'High' ? 'bg-red-900 text-red-200' :
+                        p.signal === 'Low' ? 'bg-green-900 text-green-200' :
+                        'bg-yellow-900 text-yellow-200'
+                      }`}>{p.signal}</span>
+                    </td>
+                    <td className="py-2 px-2 text-gray-400">{p.recommendation}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-black text-gray-200">
       {/* Banner */}
@@ -143,8 +389,10 @@ const DashboardLayout = () => {
                         key={workflow}
                         className="w-full px-4 py-2 text-left hover:bg-gray-800"
                         onClick={() => {
-                          setSelectedWorkflow(workflow); // something might be buggy
+                          setSelectedWorkflow(workflow);
                           setIsDropdownOpen(false);
+                          setWorkflowResult(null);
+                          setParamValues({});
                         }}
                       >
                         {workflow}
@@ -196,12 +444,11 @@ const DashboardLayout = () => {
               {selectedWorkflow && (
                 <div className="mt-6">
                   <button 
-                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2"
-                    onClick={() => {
-                      console.log('Running workflow:', selectedWorkflow, 'with params:', paramValues);
-                    }}
+                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleRunWorkflow}
+                    disabled={isRunning}
                   >
-                    Run Workflow
+                    {isRunning ? 'Running...' : 'Run Workflow'}
                   </button>
                 </div>
               )}
@@ -275,14 +522,15 @@ const DashboardLayout = () => {
               </table>
             </div>
 
-            {/* TODO: Algorithm Output Visualization, include mock of algorithm output visualization
-                  for each workflow, e.g., power flow forecast, anomaly detection, etc.
-            */}
+            {/* Algorithm Output Visualization */}
             <div className="bg-gray-900 p-4 rounded-lg border border-gray-800 flex-1">
-              <h2 className="text-lg font-semibold mb-4">Algorithm Output</h2>
-              <div className="h-full flex items-center justify-center border-2 border-dashed border-gray-700 rounded-lg bg-black">
-                <p className="text-gray-400">Select a workflow to view algorithm output visualization</p>
-              </div>
+              <h2 className="text-lg font-semibold mb-4">
+                Algorithm Output
+                {workflowResult && (
+                  <span className="text-sm font-normal text-gray-400 ml-2">— {selectedWorkflow}</span>
+                )}
+              </h2>
+              {renderWorkflowOutput()}
             </div>
           </div>
         </div>

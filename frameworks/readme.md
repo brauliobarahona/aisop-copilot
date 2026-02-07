@@ -1,4 +1,4 @@
-Many frameworks, tools, approaches, and full-fledged software solutions to create agents and agents systems exist. For the proof of concept we created we used Langchain. Below is a list of some popular and widely used ones, some of them which we also explored. 
+Many frameworks, tools, approaches, and full-fledged software solutions to create agents and agentic systems exist. For the proof of concept we created we used Langchain. Below is a list of some popular and widely used ones, some of them which we also explored. 
 
 ## Frameworks
 
@@ -15,6 +15,8 @@ Many frameworks, tools, approaches, and full-fledged software solutions to creat
 - [ ] [Rivet](https://github.com/Ironclad/rivet). IDE to create complex AI agents, including prompt chaining. https://rivet.ironcladapp.com
 
 - [ ] [Wit.ai](https://wit.ai/docs). Natural language processing platform to build conversational interfaces to IoT. [python SDK](https://github.com/wit-ai/pywit). Owned by [Meta](https://developers.facebook.com/videos/2019/meet-witai-the-free-nlp-service/), is one of the older platforms unclear if it integrates GenAI.
+
+*!* https://github.com/inkeep/agents
 
 ## Approaches
 
