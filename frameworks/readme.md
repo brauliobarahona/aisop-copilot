@@ -20,10 +20,10 @@ Many frameworks, tools, approaches, and full-fledged software solutions to creat
 
 ## Approaches
 
-Software agents have been around for a while, they can be created using various approaches based on rules, machine learning with different level of supervision or with reinforcement learning, or a combination of both. Here are some common approaches to creating software agents:
+Software agents have been around for a while, they can be created using various approaches based on rules, machine learning with different levels of supervision or with reinforcement learning, or a combination of both. Namely:
 
-1. **Rule-Based Systems**: These systems use predefined rules to determine how an agent should respond to user input. They are simple to implement but can be inflexible and difficult to scale. Modern apporaches go towards hybrid systems that combine rules with machine learning.
+1. **Rule-Based Systems**: use predefined rules to determine how an agent should respond to user input. They are simple to implement but can be inflexible and difficult to increase complexity. Modern apporaches go towards hybrid systems that combine rules with machine learning.
 
-2. **Machine Learning**: This approach involves training models on large datasets to create *agents* that understand and respond to their *environment* or user input. 
+2. **Machine Learning**: involves training models on large datasets to create *agents* that understand and respond to their *environment* or user input. Particularly, LLMs and foundation models are used to create *agentic* AI systems that given a given a program structure perform tasks autonomously and exchange inputs and outputs to achieve a given goal.  
 
 3. **Hybrid Systems**: These systems combine rule-based and machine learning approaches,e.g., symbolic ML and neuro-symbolic systems.
